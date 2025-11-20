@@ -3,8 +3,10 @@ class ContactModel {
   String name;
   String email;
   String phone;
-  String? photo;      // path lokal
-  String? avatarUrl;  // foto dari API
+  String? photo;
+  String? avatarUrl;
+  String? address;
+  String? company;
 
   ContactModel({
     this.id,
@@ -13,6 +15,8 @@ class ContactModel {
     required this.phone,
     this.photo,
     this.avatarUrl,
+    this.address,
+    this.company,
   });
 
   factory ContactModel.fromMap(Map<String, dynamic> json) => ContactModel(
@@ -22,6 +26,8 @@ class ContactModel {
         phone: json['phone'],
         photo: json['photo'],
         avatarUrl: json['avatarUrl'],
+        address: json['address'],
+        company: json['company'],
       );
 
   Map<String, dynamic> toMap() => {
@@ -30,5 +36,7 @@ class ContactModel {
         "phone": phone,
         "photo": photo,
         "avatarUrl": avatarUrl,
+        "address": address,
+        "company": company,
       };
 }

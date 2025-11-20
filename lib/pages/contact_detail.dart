@@ -15,25 +15,29 @@ class ContactDetailPage extends StatefulWidget {
 
 class _ContactDetailPageState extends State<ContactDetailPage> {
   final _picker = ImagePicker();
-  String? _photoPath;
 
+  String? _photoPath;
+  String _phoneCountryCode = '62';
+
+  // Controllers
   final _nameC = TextEditingController();
   final _emailC = TextEditingController();
   final _phoneC = TextEditingController();
   final _addressC = TextEditingController();
   final _companyC = TextEditingController();
 
-  String _phoneCountryCode = '62'; // default Indonesia
-
   @override
   void initState() {
     super.initState();
+
     if (widget.contact != null) {
       _photoPath = widget.contact!.photo;
       _nameC.text = widget.contact!.name;
       _emailC.text = widget.contact!.email;
+      _addressC.text = widget.contact!.address ?? '';
+      _companyC.text = widget.contact!.company ?? '';
 
-      // Pisahkan kode negara jika ada
+      // Pisahkan kode negara dan nomor agar tetap sesuai saat edit
       if (widget.contact!.phone.contains(' ')) {
         final parts = widget.contact!.phone.split(' ');
         _phoneCountryCode = parts[0].replaceAll('+', '');
@@ -41,39 +45,41 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
       } else {
         _phoneC.text = widget.contact!.phone;
       }
-
-      _addressC.text = "";
-      _companyC.text = "";
     }
   }
 
   // Ambil foto dari kamera
   Future<void> _takePhoto() async {
-    final XFile? image =
+    final XFile? img =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 80);
-    if (image != null) setState(() => _photoPath = image.path);
+    if (img != null) setState(() => _photoPath = img.path);
   }
 
-  // Simpan kontak ke DB
+  // Simpan / update kontak
   Future<void> _saveContact() async {
     final name = _nameC.text.trim();
     final email = _emailC.text.trim();
     final phone = _phoneC.text.trim();
+    final address = _addressC.text.trim();
+    final company = _companyC.text.trim();
 
     if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Nama dan Email wajib diisi")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Name & email required")));
       return;
     }
 
     final contact = ContactModel(
       name: name,
       email: email,
-      phone: '+$_phoneCountryCode $phone', // gabungkan kode negara + nomor
+      phone: '+$_phoneCountryCode $phone',
       photo: _photoPath,
       avatarUrl: widget.contact?.avatarUrl,
+      address: address,
+      company: company,
     );
 
+    // Insert atau update
     if (widget.contact == null) {
       await DBHelper.insertContact(contact);
     } else {
@@ -100,29 +106,42 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(widget.contact != null ? "Edit Kontak" : "Tambah Kontak")),
+        centerTitle: true,
+        title: Text(
+          widget.contact != null ? "Edit Contact" : "Add Contact",
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: Colors.deepPurple[800],
+        foregroundColor: Colors.white,
+        toolbarHeight: 60,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            const SizedBox(height: 20),
+
             // Avatar dengan kamera
             GestureDetector(
               onTap: _takePhoto,
               child: CircleAvatar(
-                radius: 60,
+                radius: 50,
                 backgroundImage: imgFile != null ? FileImage(imgFile) : null,
-                child: imgFile == null ? const Icon(Icons.camera_alt, size: 48) : null,
+                child: imgFile == null
+                    ? const Icon(Icons.camera_alt, size: 40)
+                    : null,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 38),
 
             // Nama
             TextField(
               controller: _nameC,
               decoration: InputDecoration(
-                  labelText: "Nama",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12))),
+                labelText: "Name",
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
             const SizedBox(height: 12),
 
@@ -130,60 +149,70 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
             TextField(
               controller: _emailC,
               decoration: InputDecoration(
-                  labelText: "Email",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12))),
+                labelText: "Email",
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
             const SizedBox(height: 12),
 
-            // Nomor telepon dengan kode negara global
+            // Phone dengan kode negara (Intl)
             IntlPhoneField(
               controller: _phoneC,
               decoration: InputDecoration(
-                  labelText: 'Phone',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                      counterText: '',
-                      ),
-              initialCountryCode: 'ID',
+                labelText: 'Phone',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: '',
+              ),
+              initialCountryCode: _phoneCountryCode,
               onChanged: (phone) {
-                _phoneCountryCode = phone.countryCode; // simpan kode negara
+                _phoneCountryCode = phone.countryCode; // angka tetap
               },
             ),
             const SizedBox(height: 12),
 
-            // Address
-            TextField(
-              controller: _addressC,
-              decoration: InputDecoration(
-                  labelText: "Address (opsional)",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12))),
+            // Address + Company
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _addressC,
+                    decoration: InputDecoration(
+                      labelText: "Address",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _companyC,
+                    decoration: InputDecoration(
+                      labelText: "Company",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 38),
 
-            // Company
-            TextField(
-              controller: _companyC,
-              decoration: InputDecoration(
-                  labelText: "Company (opsional)",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12))),
-            ),
-            const SizedBox(height: 16),
-
-            // Tombol simpan
+            // Tombol Save
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _saveContact,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[800],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 14)),
-                child: const Text("Simpan", style: TextStyle(fontSize: 16)),
+                  backgroundColor: Colors.deepPurple[800],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text("Save", style: TextStyle(fontSize: 16)),
               ),
             ),
           ],

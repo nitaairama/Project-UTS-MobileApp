@@ -26,15 +26,17 @@ class DBHelper {
           )
         """);
 
-        // Buat tabel kontak
+        // Buat tabel kontak dengan kolom address & company
         await db.execute("""
           CREATE TABLE contacts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            email TEXT,
-            phone TEXT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL,
             photo TEXT,
-            avatarUrl TEXT
+            avatarUrl TEXT,
+            address TEXT,
+            company TEXT
           )
         """);
       },
@@ -42,15 +44,15 @@ class DBHelper {
   }
 
   // Ambil user berdasarkan id
-static Future<UserModel?> loginById(int id) async {
-  final res = await _db!.query(
-    'users',
-    where: "id=?",
-    whereArgs: [id],
-  );
-  if (res.isNotEmpty) return UserModel.fromMap(res.first);
-  return null;
-}
+  static Future<UserModel?> loginById(int id) async {
+    final res = await _db!.query(
+      'users',
+      where: "id=?",
+      whereArgs: [id],
+    );
+    if (res.isNotEmpty) return UserModel.fromMap(res.first);
+    return null;
+  }
 
   // Register user baru
   static Future<int> insertUser(UserModel user) async {

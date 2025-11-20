@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
+
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
@@ -20,7 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordC.text;
 
     if (username.isEmpty || password.isEmpty) {
-      setState(() => _msg = "Isi semua field.");
+      setState(() => _msg = "Username & password required");
       return;
     }
 
@@ -28,12 +29,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       await DBHelper.insertUser(user);
-      setState(() => _msg = "Registrasi sukses, silahkan login.");
+
+      setState(() => _msg = "Registration successful!");
+
       await Future.delayed(const Duration(milliseconds: 800));
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      // Kemungkinan error: username duplicate
-      setState(() => _msg = "Gagal registrasi, username mungkin sudah dipakai.");
+      // Error kemungkinan: username duplicate
+      setState(() => _msg = "Registration failed, username exists");
     }
   }
 
@@ -46,13 +49,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Colors.blue[800];
+    final primaryColor = Colors.deepPurple[800];
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Register"),
-        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: const Text("Register", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -64,9 +69,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   "Create Account",
                   style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: primaryColor),
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 const Text(
@@ -96,10 +102,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(12)),
                     suffixIcon: IconButton(
                       icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey),
+                        _obscurePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -109,14 +116,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Pesan error atau info
+                // Pesan sukses / error
                 if (_msg.isNotEmpty)
                   Text(
                     _msg,
                     style: TextStyle(
-                        color: _msg.contains("sukses")
-                            ? Colors.green[800]
-                            : Colors.red[800]),
+                      color: _msg.contains("successful")
+                          ? Colors.green[800]
+                          : Colors.red[800],
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 const SizedBox(height: 24),
                 // Tombol register
@@ -142,7 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    "Sudah punya akun? Login",
+                    "Already have an account? Login",
                     style: TextStyle(
                         color: primaryColor, fontWeight: FontWeight.bold),
                   ),

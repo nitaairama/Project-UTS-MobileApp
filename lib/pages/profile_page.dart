@@ -18,7 +18,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final _usernameC = TextEditingController();
   String? _photoPath;
   final _picker = ImagePicker();
-  final double borderRadius = 12.0;
 
   @override
   void initState() {
@@ -57,9 +56,21 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Hapus akun beserta kontak
+  // Hapus akun beserta kontak dengan konfirmasi
   Future<void> _deleteAccount() async {
-    if (widget.user.id != null) {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Confirmation"),
+        content: const Text("Are you sure you want to delete your account? This action cannot be undone"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text("Cancel")),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text("Delete", style: TextStyle(color: Colors.red[800]),)),
+        ],
+      ),
+    );
+
+    if (confirm == true && widget.user.id != null) {
       await DBHelper.deleteAllContacts(); // Hapus semua kontak
       await DBHelper.deleteUser(widget.user.id!); // Hapus user
       final prefs = await SharedPreferences.getInstance();
@@ -73,101 +84,92 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   @override
+  void dispose() {
+    _usernameC.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final avatar = (_photoPath != null && _photoPath!.isNotEmpty) ? FileImage(File(_photoPath!)) : null;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text("Profil"),
+        toolbarHeight: 60,
+        title: const Text("Profile",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+        backgroundColor: Colors.deepPurple[800],
+        foregroundColor: Colors.white,
         actions: [
-          // Tombol hapus akun di pojok kanan atas dengan popup konfirmasi
+          // Tombol hapus akun
           IconButton(
             icon: const Icon(Icons.delete),
-            color: Colors.blue[800],
-            tooltip: "Hapus Akun",
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text("Hapus Akun?"),
-                  content: const Text(
-                      "Semua data kontak dan akun akan dihapus permanen. Lanjutkan?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text("Batal"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text("Hapus", style: TextStyle(color: Colors.red)),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                _deleteAccount(); // Hapus akun jika dikonfirmasi
-              }
-            },
-          ),
+            onPressed: _deleteAccount,
+            tooltip: "Delete Account",
+          )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Avatar dengan klik untuk kamera
-            GestureDetector(
-              onTap: _pickPhoto,
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: avatar,
-                child: avatar == null ? const Icon(Icons.camera_alt, size: 48) : null,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              // Avatar user
+              GestureDetector(
+                onTap: _pickPhoto,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: avatar,
+                  child: avatar == null ? const Icon(Icons.camera_alt, size: 40) : null,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            // Input username
-            TextField(
-              controller: _usernameC,
-              decoration: const InputDecoration(
-                labelText: "Username",
-                border: OutlineInputBorder(),
+              const SizedBox(height: 38),
+              
+              // Input username
+              TextField(
+                controller: _usernameC,
+                decoration: const InputDecoration(
+                  labelText: "Username",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            // Tombol simpan
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _saveProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
+              const SizedBox(height: 24),
+
+              // Row tombol Save & Logout
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _saveProfile,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple[800],
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Simpan"),
+                    ),
                   ),
-                ),
-                child: const Text("Simpan"),
+                  const SizedBox(width: 12), // jarak antar tombol
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _logout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red[800],
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Logout"),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            // Tombol Logout
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(borderRadius)),
-                ),
-                onPressed: _logout,
-                child: const Text("Logout"),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -105,8 +105,11 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Contact List"),
-        backgroundColor: Colors.grey[100],
+        title: const Text("Contact List",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
+        backgroundColor: Colors.deepPurple[800],
+        foregroundColor: Colors.white,
+        toolbarHeight: 60,
         actions: [
           // Avatar user clickable untuk masuk ke profile
           GestureDetector(
@@ -120,9 +123,9 @@ class _HomePageState extends State<HomePage> {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.only(right: 14, top: 6, bottom: 6),
+              padding: const EdgeInsets.only(right: 18, top: 6, bottom: 6),
               child: CircleAvatar(
-                radius: 20,
+                radius: 16,
                 backgroundImage: avatar,
                 child: avatar == null ? const Icon(Icons.person, size: 22) : null
               ),
@@ -132,6 +135,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
+          SizedBox(height: 10,),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -156,13 +160,13 @@ class _HomePageState extends State<HomePage> {
                 // Tombol random contact
                 IconButton(
                   onPressed: _addRandomContact,
-                  icon: Icon(Icons.shuffle, color: Colors.blue[800]),
+                  icon: Icon(Icons.shuffle, color: Colors.deepPurple[800]),
                   tooltip: "Add Random Contact",
                 ),
                 const SizedBox(width: 4),
                 // Tombol sort (popup)
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.sort, color: Colors.blue[800]),
+                  icon: Icon(Icons.sort, color: Colors.deepPurple[800]),
                   onSelected: (value) => _sortContacts(value),
                   itemBuilder: (_) => const [
                     PopupMenuItem(value: 'name_asc', child: Text('A-Z')),
@@ -173,6 +177,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+          SizedBox(height: 10,),
           // List kontak
           Expanded(
             child: _loading
@@ -195,7 +200,7 @@ class _HomePageState extends State<HomePage> {
                             title: Text(c.name),
                             subtitle: Text(c.email),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
+                              icon: Icon(Icons.delete, color: Colors.red[800]),
                               onPressed: () => _confirmDelete(context, c.id!),
                             ),
                             onTap: () async {
@@ -213,7 +218,7 @@ class _HomePageState extends State<HomePage> {
       ),
       // FAB untuk tambah kontak manual
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue[800],
+        backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
         onPressed: () async {
           await Navigator.push(

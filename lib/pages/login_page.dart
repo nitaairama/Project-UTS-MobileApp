@@ -19,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _checkSession(); // cek session user
+    _checkSession();
   }
 
   /// Mengecek session login yang tersimpan di SharedPreferences
@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordC.text;
 
     if (username.isEmpty || password.isEmpty) {
-      setState(() => _error = "Username & password wajib diisi.");
+      setState(() => _error = "Username & password required");
       return;
     }
 
@@ -51,10 +51,10 @@ class _LoginPageState extends State<LoginPage> {
             context, MaterialPageRoute(builder: (_) => const HomePage()));
       } else {
         setState(() => _error =
-            "Login gagal — user tidak ditemukan atau password salah.");
+            "Invalid username or password");
       }
     } catch (e) {
-      setState(() => _error = "Terjadi kesalahan saat login.");
+      setState(() => _error = "An error occurred during login");
     }
   }
 
@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[800]),
+                      color: Colors.deepPurple[800]),
                 ),
                 const SizedBox(height: 5),
                 const Text(
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: _doLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[800],
+                      backgroundColor: Colors.deepPurple[800],
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -203,9 +203,9 @@ class _LoginPageState extends State<LoginPage> {
                       MaterialPageRoute(
                           builder: (_) => const RegisterPage())),
                   child: Text(
-                    "Belum punya akun? Register",
+                    "Don't have an account? Register",
                     style: TextStyle(
-                        color: Colors.blue[800],
+                        color: Colors.deepPurple[800],
                         fontWeight: FontWeight.bold),
                   ),
                 ),
