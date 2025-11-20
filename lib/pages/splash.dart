@@ -27,10 +27,13 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/images/logo.png", width: 120),
-            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset("assets/images/logo.png", width: 120),
+            ),
+            const SizedBox(height: 40),
             const Text(
-              "Contacts App",
+              "PersonaList",
               style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             )
           ],
