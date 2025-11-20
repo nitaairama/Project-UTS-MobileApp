@@ -53,12 +53,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Register", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-      ),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -70,16 +64,19 @@ class _RegisterPageState extends State<RegisterPage> {
                   "Create Account",
                   style: TextStyle(
                     fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: primaryColor,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 3),
                 const Text(
                   "Register a new user",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                  style: TextStyle(fontSize: 16, 
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black54),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 38),
+
                 // Input username
                 TextField(
                   controller: _usernameC,
@@ -87,10 +84,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     labelText: "Username",
                     prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(13)),
                   ),
                 ),
                 const SizedBox(height: 16),
+
                 // Input password
                 TextField(
                   controller: _passwordC,
@@ -99,7 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     labelText: "Password",
                     prefixIcon: const Icon(Icons.lock),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(13)),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
@@ -115,19 +113,21 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+
                 // Pesan sukses / error
                 if (_msg.isNotEmpty)
-                  Text(
-                    _msg,
+                  Text(_msg,
                     style: TextStyle(
                       color: _msg.contains("successful")
                           ? Colors.green[800]
                           : Colors.red[800],
                       fontWeight: FontWeight.w500,
+                      fontSize: 12,
                     ),
                   ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
                 // Tombol register
                 SizedBox(
                   width: double.infinity,
@@ -138,22 +138,23 @@ class _RegisterPageState extends State<RegisterPage> {
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(13)),
                     ),
                     child: const Text(
                       "Register",
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 38),
+
                 // Link ke login
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
                     "Already have an account? Login",
                     style: TextStyle(
-                        color: primaryColor, fontWeight: FontWeight.bold),
+                        color: primaryColor, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],

@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     _checkSession();
   }
 
-  /// Mengecek session login yang tersimpan di SharedPreferences
+  /// Cek session login di SharedPreferences
   Future<void> _checkSession() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
@@ -78,18 +78,22 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Welcome Back",
+                  "Welcome",
                   style: TextStyle(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: Colors.deepPurple[800]),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 3),
                 const Text(
                   "Login to your account",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black54),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 38),
+
                 // Input username
                 TextField(
                   controller: _usernameC,
@@ -97,10 +101,11 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: "Username",
                     prefixIcon: const Icon(Icons.person),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(13)),
                   ),
                 ),
                 const SizedBox(height: 16),
+
                 // Input password
                 TextField(
                   controller: _passwordC,
@@ -109,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: "Password",
                     prefixIcon: const Icon(Icons.lock),
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(13)),
                     suffixIcon: IconButton(
                       icon: Icon(
                           _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -122,13 +127,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+
                 // Error message
                 if (_error.isNotEmpty)
                   Text(_error,
-                      style: TextStyle(color: Colors.red[800])),
-                const SizedBox(height: 24),
-                // Tombol login SQLite
+                      style: TextStyle(color: Colors.red[800], fontSize: 12)),
+                const SizedBox(height: 16),
+
+                // Tombol login
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -138,20 +145,21 @@ class _LoginPageState extends State<LoginPage> {
                       backgroundColor: Colors.deepPurple[800],
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(13)),
                     ),
                     child: const Text(
                       "Login",
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 const Text(
                   "Or login with",
-                  style: TextStyle(color: Colors.black54),
+                  style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 16),
+
                 // Tombol Google & Facebook 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -170,11 +178,11 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(13),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 10),
                     ElevatedButton.icon(
                       onPressed: () {},
                       icon: Image.asset(
@@ -189,13 +197,14 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(13),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 38),
+
                 // Link register
                 TextButton(
                   onPressed: () => Navigator.push(
@@ -206,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                     "Don't have an account? Register",
                     style: TextStyle(
                         color: Colors.deepPurple[800],
-                        fontWeight: FontWeight.bold),
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
               ],

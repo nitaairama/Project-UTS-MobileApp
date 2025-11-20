@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Contact List",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),),
         backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
         toolbarHeight: 60,

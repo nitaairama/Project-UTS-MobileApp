@@ -98,7 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         toolbarHeight: 60,
         title: const Text("Profile",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
         backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
         actions: [
@@ -150,10 +150,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text("Simpan"),
+                      child: const Text("Simpan", style: TextStyle(fontWeight: FontWeight.w800)),
                     ),
                   ),
-                  const SizedBox(width: 12), // jarak antar tombol
+                  const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _logout,
@@ -163,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: const Text("Logout"),
+                      child: const Text("Logout", style: TextStyle(fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ],

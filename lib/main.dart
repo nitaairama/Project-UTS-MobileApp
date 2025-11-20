@@ -22,7 +22,8 @@ class MyApp extends StatelessWidget {
       title: 'Contacts App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepPurple,
+        fontFamily: 'Poppins',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const SplashPage(),

@@ -109,7 +109,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
         centerTitle: true,
         title: Text(
           widget.contact != null ? "Edit Contact" : "Add Contact",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
@@ -212,7 +212,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                       borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text("Save", style: TextStyle(fontSize: 16)),
+                child: const Text("Save", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
               ),
             ),
           ],
