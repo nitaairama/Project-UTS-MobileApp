@@ -19,7 +19,8 @@ class _HomePageState extends State<HomePage> {
   UserModel? _user;
   List<ContactModel> _contacts = [];
   List<ContactModel> _filtered = [];
-  bool _loading = true; // Flag loading
+  List<ContactModel> _recent = [];
+  bool _loading = true;
   final _searchC = TextEditingController();
   String _sortType = 'none';
 
@@ -30,39 +31,39 @@ class _HomePageState extends State<HomePage> {
     _loadContacts();
   }
 
-  // Load user profile dari SharedPreferences + SQLite
+  // Load user profile dari SQLite + SharedPreferences
   Future<void> _loadUserProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-
     if (userId != null) {
       final dbUser = await DBHelper.loginById(userId);
       setState(() => _user = dbUser);
     }
   }
 
-  // Load semua kontak dari SQLite
+  // Load kontak
   Future<void> _loadContacts() async {
     setState(() => _loading = true);
     final list = await DBHelper.getContacts();
     setState(() {
       _contacts = list;
       _filtered = list;
+      // Hapus recent jika kontak sudah dihapus
+      _recent = _recent.where((c) => _contacts.any((x) => x.id == c.id)).toList();
       _loading = false;
     });
-    // Jika sebelumnya sudah di-sort, terapkan lagi
     if (_sortType != 'none') _sortContacts(_sortType);
   }
 
-  // Tambah kontak random dari API
+  // Tambah kontak random
   Future<void> _addRandomContact() async {
     setState(() => _loading = true);
     try {
       final contact = await ApiService.fetchRandomContact();
       await DBHelper.insertContact(contact);
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Failed to add random contact")));
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to add random contact")));
     }
     await _loadContacts();
   }
@@ -73,7 +74,7 @@ class _HomePageState extends State<HomePage> {
     await _loadContacts();
   }
 
-  // Filter kontak berdasarkan keyword search
+  // Filter kontak
   void _search(String keyword) {
     final filtered = _contacts.where((c) {
       return c.name.toLowerCase().contains(keyword.toLowerCase()) ||
@@ -84,10 +85,10 @@ class _HomePageState extends State<HomePage> {
     if (_sortType != 'none') _sortContacts(_sortType);
   }
 
-  // Sort kontak berdasarkan nama
+  // Sort kontak
   void _sortContacts(String type) {
     setState(() {
-      _sortType = type; // simpan tipe sort
+      _sortType = type;
       if (type == 'name_asc') {
         _filtered.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       } else if (type == 'name_desc') {
@@ -96,22 +97,31 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Tambahkan kontak ke recent saat di-tap / di-edit
+  void _addToRecent(ContactModel contact) {
+    setState(() {
+      _recent.removeWhere((c) => c.id == contact.id);
+      _recent.insert(0, contact);
+      if (_recent.length > 5) _recent = _recent.sublist(0, 5); // Max 5 recent
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Avatar user di appbar
     final avatar = (_user?.photo != null && _user!.photo!.isNotEmpty)
         ? FileImage(File(_user!.photo!))
         : null;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Contact List",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),),
+        title: const Text(
+          "PersonaList",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+        ),
         backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
         toolbarHeight: 60,
         actions: [
-          // Avatar user clickable untuk masuk ke profile
           GestureDetector(
             onTap: () async {
               if (_user != null) {
@@ -127,7 +137,7 @@ class _HomePageState extends State<HomePage> {
               child: CircleAvatar(
                 radius: 16,
                 backgroundImage: avatar,
-                child: avatar == null ? const Icon(Icons.person, size: 22) : null
+                child: avatar == null ? const Icon(Icons.person, size: 22) : null,
               ),
             ),
           ),
@@ -135,12 +145,12 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 10,),
+          const SizedBox(height: 20),
+          // Search bar
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                // Search bar
                 Expanded(
                   flex: 5,
                   child: TextField(
@@ -157,33 +167,128 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Tombol random contact
-                IconButton(
-                  onPressed: _addRandomContact,
-                  icon: Icon(Icons.shuffle, color: Colors.deepPurple[800]),
-                  tooltip: "Add Random Contact",
+                // Random
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: _addRandomContact,
+                    icon: const Icon(Icons.shuffle, color: Colors.white),
+                    tooltip: "Add Random Contact",
+                  ),
                 ),
-                const SizedBox(width: 4),
-                // Tombol sort (popup)
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.sort, color: Colors.deepPurple[800]),
-                  onSelected: (value) => _sortContacts(value),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'name_asc', child: Text('A-Z')),
-                    PopupMenuItem(value: 'name_desc', child: Text('Z-A')),
-                  ],
-                  tooltip: "Sort Contacts",
+                const SizedBox(width: 6),
+                // Sort
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.sort, color: Colors.white),
+                    onSelected: (value) => _sortContacts(value),
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'name_asc', child: Text('A-Z')),
+                      PopupMenuItem(value: 'name_desc', child: Text('Z-A')),
+                    ],
+                    tooltip: "Sort Contacts",
+                  ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 10,),
-          // List kontak
+          const SizedBox(height: 16),
+
+          // Recent title
+          if (_recent.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 13),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Recent",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: Colors.deepPurple[800])),
+              ),
+            ),
+          if (_recent.isNotEmpty)
+            SizedBox(
+              height: 96,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _recent.length,
+                itemBuilder: (context, i) {
+                  final c = _recent[i];
+                  final avatarImg = (c.photo != null && c.photo!.isNotEmpty)
+                      ? FileImage(File(c.photo!))
+                      : (c.avatarUrl != null ? NetworkImage(c.avatarUrl!) : null);
+                  return GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => ContactDetailPage(contact: c)),
+                      );
+                      _addToRecent(c);
+                      await _loadContacts();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundImage: avatarImg as ImageProvider?,
+                            child: avatarImg == null ? const Icon(Icons.person) : null,
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: 60,
+                            child: Text(
+                              c.name,
+                              style: const TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          const SizedBox(height: 10),
+          // Contacts title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Contacts",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: Colors.deepPurple[800])),
+            ),
+          ),
+          const SizedBox(height: 6),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _filtered.isEmpty
-                    ? const Center(child: Text("No contacts found"))
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.inbox, size: 48, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text("Empty", style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      )
                     : ListView.builder(
                         itemCount: _filtered.length,
                         itemBuilder: (context, i) {
@@ -192,31 +297,39 @@ class _HomePageState extends State<HomePage> {
                               ? FileImage(File(c.photo!))
                               : (c.avatarUrl != null ? NetworkImage(c.avatarUrl!) : null);
 
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage: avatarImg as ImageProvider?,
-                              child: avatarImg == null ? const Icon(Icons.person) : null,
+                          return Dismissible(
+                            key: Key(c.id.toString()),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              color: Colors.red[300],
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              child: const Icon(Icons.delete, color: Colors.white),
                             ),
-                            title: Text(c.name),
-                            subtitle: Text(c.email),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red[800]),
-                              onPressed: () => _confirmDelete(context, c.id!),
+                            onDismissed: (_) => _deleteContact(c.id!),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: avatarImg as ImageProvider?,
+                                child: avatarImg == null ? const Icon(Icons.person) : null,
+                              ),
+                              title: Text(c.name),
+                              subtitle: Text(c.email),
+                              onTap: () async {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => ContactDetailPage(contact: c)),
+                                );
+                                _addToRecent(c);
+                                await _loadContacts();
+                              },
                             ),
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => ContactDetailPage(contact: c)),
-                              );
-                              await _loadContacts();
-                            },
                           );
                         },
                       ),
           ),
         ],
       ),
-      // FAB untuk tambah kontak manual
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple[800],
         foregroundColor: Colors.white,
@@ -229,27 +342,6 @@ class _HomePageState extends State<HomePage> {
         },
         child: const Icon(Icons.add),
         tooltip: "Add Contact",
-      ),
-    );
-  }
-
-  // Konfirmasi delete kontak
-  void _confirmDelete(BuildContext ctx, int id) {
-    showDialog(
-      context: ctx,
-      builder: (_) => AlertDialog(
-        title: const Text("Delete contact?"),
-        content: const Text("Are you sure you want to delete this contact?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _deleteContact(id);
-            },
-            child: Text("Delete", style: TextStyle(color: Colors.red[800])),
-          ),
-        ],
       ),
     );
   }
